@@ -1,5 +1,6 @@
 package com.james.mall.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.james.mall.dto.PmsProductQueryParam;
 import com.james.mall.mapper.PmsProductMapper;
 import com.james.mall.model.PmsProduct;
@@ -27,6 +28,7 @@ public class PmsProductServiceImpl implements PmsProductService {
 
     @Override
     public List<PmsProduct> getProductList(PmsProductQueryParam productQueryParam, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum,pageSize);
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
         criteria.andDeleteStatusEqualTo(0);
