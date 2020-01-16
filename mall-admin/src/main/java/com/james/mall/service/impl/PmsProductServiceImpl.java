@@ -28,7 +28,7 @@ public class PmsProductServiceImpl implements PmsProductService {
 
     @Override
     public List<PmsProduct> getProductList(PmsProductQueryParam productQueryParam, Integer pageNum, Integer pageSize) {
-        PageHelper.startPage(pageNum,pageSize);
+        PageHelper.startPage(pageNum, pageSize);
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
         criteria.andDeleteStatusEqualTo(0);
@@ -38,20 +38,53 @@ public class PmsProductServiceImpl implements PmsProductService {
         if (!StringUtils.isEmpty(productQueryParam.getProductSn())) {
             criteria.andProductSnEqualTo(productQueryParam.getProductSn());
         }
-        if(productQueryParam.getProductCategoryId()!=null){
+        if (productQueryParam.getProductCategoryId() != null) {
             criteria.andProductCategoryIdEqualTo(productQueryParam.getProductCategoryId());
         }
-        if(productQueryParam.getBrandId()!=null){
+        if (productQueryParam.getBrandId() != null) {
             criteria.andBrandIdEqualTo(productQueryParam.getBrandId());
         }
-        if(productQueryParam.getPublishStatus()!=null){
+        if (productQueryParam.getPublishStatus() != null) {
             criteria.andPublishStatusEqualTo(productQueryParam.getPublishStatus());
         }
-        if(productQueryParam.getVerifyStatus()!=null){
+        if (productQueryParam.getVerifyStatus() != null) {
             criteria.andVerifyStatusEqualTo(productQueryParam.getVerifyStatus());
         }
         return productMapper.selectByExample(productExample);
     }
+
+
+    @Override
+    public List<PmsProduct> getProductList(String keyword) {
+        PmsProductExample productExample = new PmsProductExample();
+        PmsProductExample.Criteria criteria = productExample.createCriteria();
+        criteria.andDeleteStatusEqualTo(0);
+        if (!StringUtils.isEmpty(keyword)) {
+            criteria.andNameLike("%" + keyword + "%");
+            productExample.or().andDeleteStatusEqualTo(0).andProductSnLike("%" + keyword + "%");
+        }
+        return productMapper.selectByExample(productExample);
+    }
+
+    @Override
+    public int updatePublishStatus(List<Long> ids, Integer publishStatus) {
+        PmsProduct product = new PmsProduct();
+        product.setPublishStatus(publishStatus);
+        PmsProductExample productExample = new PmsProductExample();
+        productExample.createCriteria().andIdIn(ids);
+        return productMapper.updateByExampleSelective(product, productExample);
+    }
+
+    @Override
+    public int updateRecommendStatus(List<Long> ids, Integer recommendStatus) {
+        PmsProduct product = new PmsProduct();
+        product.setRecommandStatus(recommendStatus);
+        PmsProductExample productExample = new PmsProductExample();
+        productExample.createCriteria().andIdIn(ids);
+        return productMapper.updateByExampleSelective(product, productExample);
+    }
+
+
 }
 
 

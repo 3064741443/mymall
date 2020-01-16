@@ -12,7 +12,25 @@ import java.util.List;
  * @create: 2020-01-13 01:14
  */
 public interface PmsProductService {
+   /**
+    * 分页商品查询
+    */
    List<PmsProduct> getProductList(PmsProductQueryParam productQueryParam,Integer pageNum,Integer pageSize);
+
+   /**
+    * 根据商品名称或者货号模糊查询
+    */
+   List<PmsProduct> getProductList(String keyword);
+
+   /**
+    * 商品批量上下架
+    */
+   int updatePublishStatus(List<Long> ids,Integer publishStatus);
+
+   /**
+    * 商品批量推荐
+    */
+   int updateRecommendStatus(List<Long> ids,Integer recommendStatus);
 }
 
 
