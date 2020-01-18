@@ -27,7 +27,7 @@ public class PmsProductServiceImpl implements PmsProductService {
     private PmsProductMapper productMapper;
 
     @Override
-    public List<PmsProduct> getProductList(PmsProductQueryParam productQueryParam, Integer pageNum, Integer pageSize) {
+    public List<PmsProduct> listProduct(PmsProductQueryParam productQueryParam, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
@@ -55,7 +55,7 @@ public class PmsProductServiceImpl implements PmsProductService {
 
 
     @Override
-    public List<PmsProduct> getProductList(String keyword) {
+    public List<PmsProduct> listProduct(String keyword) {
         PmsProductExample productExample = new PmsProductExample();
         PmsProductExample.Criteria criteria = productExample.createCriteria();
         criteria.andDeleteStatusEqualTo(0);
@@ -80,6 +80,24 @@ public class PmsProductServiceImpl implements PmsProductService {
         PmsProduct product = new PmsProduct();
         product.setRecommandStatus(recommendStatus);
         PmsProductExample productExample = new PmsProductExample();
+        productExample.createCriteria().andIdIn(ids);
+        return productMapper.updateByExampleSelective(product, productExample);
+    }
+
+    @Override
+    public int updateDeleteStatus(List<Long> ids, Integer deleteStatus) {
+        PmsProduct product = new PmsProduct();
+        product.setDeleteStatus(deleteStatus);
+        PmsProductExample productExample = new PmsProductExample();
+        productExample.createCriteria().andIdIn(ids);
+        return productMapper.updateByExampleSelective(product, productExample);
+    }
+
+    @Override
+    public int updateNewStatus(List<Long> ids, Integer newStatus) {
+        PmsProduct product=new PmsProduct();
+        product.setNewStatus(newStatus);
+        PmsProductExample productExample=new PmsProductExample();
         productExample.createCriteria().andIdIn(ids);
         return productMapper.updateByExampleSelective(product, productExample);
     }
