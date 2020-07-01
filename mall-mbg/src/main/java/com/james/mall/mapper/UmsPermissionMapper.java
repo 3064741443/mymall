@@ -3,6 +3,7 @@ package com.james.mall.mapper;
 import com.james.mall.model.UmsPermission;
 import com.james.mall.model.UmsPermissionExample;
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 public interface UmsPermissionMapper {
