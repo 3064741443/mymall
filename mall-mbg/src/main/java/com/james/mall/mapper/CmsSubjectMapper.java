@@ -3,7 +3,6 @@ package com.james.mall.mapper;
 import com.james.mall.model.CmsSubject;
 import com.james.mall.model.CmsSubjectExample;
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 
 public interface CmsSubjectMapper {

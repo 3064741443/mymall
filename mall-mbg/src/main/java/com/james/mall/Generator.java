@@ -1,19 +1,17 @@
 package com.james.mall;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.mybatis.generator.api.MyBatisGenerator;
 import org.mybatis.generator.config.Configuration;
 import org.mybatis.generator.config.xml.ConfigurationParser;
 import org.mybatis.generator.internal.DefaultShellCallback;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * @program: mymall
- * @description: 用于生产MBG的代码
- * @author: james
- * @create: 2020-01-12 23:36
+ * 用于生产MBG的代码
+ * Created by macro on 2018/4/26.
  */
 public class Generator {
     public static void main(String[] args) throws Exception {

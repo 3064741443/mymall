@@ -1,7 +1,5 @@
 package com.james.mall;
 
-import java.util.Properties;
-
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.dom.java.CompilationUnit;
@@ -10,11 +8,11 @@ import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
 import org.mybatis.generator.internal.DefaultCommentGenerator;
 import org.mybatis.generator.internal.util.StringUtility;
 
+import java.util.Properties;
+
 /**
- * @program: mymall
- * @description: 自定义注释生成器
- * @author: james
- * @create: 2020-01-12 23:36
+ * 自定义注释生成器
+ * Created by macro on 2018/4/26.
  */
 public class CommentGenerator extends DefaultCommentGenerator {
     private boolean addRemarkComments = false;

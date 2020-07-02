@@ -1,10 +1,8 @@
 package com.james.mall.mapper;
 
-import com.james.mall.model.OmsOrderItemExample;
 import com.james.mall.model.OmsOrderItem;
-
+import com.james.mall.model.OmsOrderItemExample;
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 
 public interface OmsOrderItemMapper {

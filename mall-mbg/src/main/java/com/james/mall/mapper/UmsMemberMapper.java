@@ -1,10 +1,8 @@
 package com.james.mall.mapper;
 
-import com.james.mall.model.UmsMemberExample;
 import com.james.mall.model.UmsMember;
-
+import com.james.mall.model.UmsMemberExample;
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 
 public interface UmsMemberMapper {
