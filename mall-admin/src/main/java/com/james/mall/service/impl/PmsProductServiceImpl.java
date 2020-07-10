@@ -1,7 +1,9 @@
 package com.james.mall.service.impl;
 
 import com.github.pagehelper.PageHelper;
+import com.james.mall.dao.PmsProductDao;
 import com.james.mall.dto.PmsProductQueryParam;
+import com.james.mall.dto.PmsProductResult;
 import com.james.mall.mapper.PmsProductMapper;
 import com.james.mall.model.PmsProduct;
 import com.james.mall.model.PmsProductExample;
@@ -25,6 +27,15 @@ public class PmsProductServiceImpl implements PmsProductService {
     private static final Logger LOGGER = LoggerFactory.getLogger(PmsProductServiceImpl.class);
     @Autowired
     private PmsProductMapper productMapper;
+
+    @Autowired
+    private PmsProductDao productDao;
+
+    @Override
+    public PmsProductResult getUpdateInfo(String id) {
+        PmsProductResult productResult=productDao.getUpdateInfo(id);
+        return productResult;
+    }
 
     @Override
     public List<PmsProduct> listProduct(PmsProductQueryParam productQueryParam, Integer pageNum, Integer pageSize) {

@@ -3,6 +3,7 @@ package com.james.mall.controller;
 import com.james.mall.common.api.CommonPage;
 import com.james.mall.common.api.CommonResult;
 import com.james.mall.dto.PmsProductQueryParam;
+import com.james.mall.dto.PmsProductResult;
 import com.james.mall.model.PmsProduct;
 import com.james.mall.service.PmsProductService;
 import io.swagger.annotations.Api;
@@ -24,6 +25,23 @@ import java.util.List;
 public class PmsProductController {
     @Autowired
     private PmsProductService productService;
+
+
+/*    @ApiOperation("创建商品")
+    @RequestMapping(value = "/updateInfo/{id}", method = RequestMethod.GET)
+    public CommonResult getUpdateInfo(@PathVariable("id")String id) {
+        PmsProductResult productResult = productService.getUpdateInfo(id);
+        return CommonResult.success(productResult);
+
+    }*/
+
+    @ApiOperation("根据商品id获取商品编辑信息")
+    @RequestMapping(value = "/updateInfo/{id}", method = RequestMethod.GET)
+    public CommonResult getUpdateInfo(@PathVariable("id")String id) {
+        PmsProductResult productResult = productService.getUpdateInfo(id);
+        return CommonResult.success(productResult);
+
+    }
 
     @ApiOperation("查询商品")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
@@ -76,8 +94,8 @@ public class PmsProductController {
 
     @ApiOperation("批量修改商品新品状态")
     @RequestMapping(value = "/update/newStatus", method = RequestMethod.PUT)
-    public CommonResult updateNewStatus(@RequestParam("ids") List<Long> ids, @RequestParam("deleteStatus") Integer deleteStatus) {
-        int count = productService.updateDeleteStatus(ids, deleteStatus);
+    public CommonResult updateNewStatus(@RequestParam("ids") List<Long> ids, @RequestParam("newStatus") Integer newStatus) {
+        int count = productService.updateNewStatus(ids, newStatus);
         if (count > 0) {
             return CommonResult.success(count);
         } else {

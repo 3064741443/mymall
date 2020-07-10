@@ -1,6 +1,7 @@
 package com.james.mall.service;
 
 import com.james.mall.dto.PmsProductQueryParam;
+import com.james.mall.dto.PmsProductResult;
 import com.james.mall.model.PmsProduct;
 
 import java.util.List;
@@ -12,6 +13,10 @@ import java.util.List;
  * @create: 2020-01-13 01:14
  */
 public interface PmsProductService {
+
+
+    PmsProductResult getUpdateInfo(String id);
+
     /**
      * description: 分页商品查询
      * version: 1.0

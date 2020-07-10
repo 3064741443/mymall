@@ -2,7 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    <repositories>
+        <repository>
+            <id>maven-ali</id>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+        </repository>
+    </repositories>
     <groupId>com.james.mall</groupId>
     <artifactId>mymall</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -12,6 +25,8 @@
 
     <modules>
         <module>mall-common</module>
+        <module>mall-mbg</module>
+        <module>mall-security</module>
         <module>mall-admin</module>
     </modules>
 
@@ -84,18 +99,12 @@
                 <version>${mall-common.version}</version>
             </dependency>
             <!--mall中MBG生成模块-->
-            <!--<dependency>
-                <groupId>com.macro.mall</groupId>
-                <artifactId>mall-mbg</artifactId>
-                <version>${mall-mbg.version}</version>
-            </dependency>
-            &lt;!&ndash;mall安全模块&ndash;&gt;
             <dependency>
-                <groupId>com.macro.mall</groupId>
-                <artifactId>mall-security</artifactId>
-                <version>${mall-security.version}</version>
-            </dependency>-->
-            <!--MyBatis分页插件starter-->
+                <groupId>com.james.mall</groupId>
+                <artifactId>mall-mbg</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+
             <dependency>
                 <groupId>com.github.pagehelper</groupId>
                 <artifactId>pagehelper-spring-boot-starter</artifactId>
