@@ -84,6 +84,13 @@ public class PmsProductController {
             return CommonResult.failed();
         }
     }
+
+    @ApiOperation("查询商品")
+    @RequestMapping(value = "/updateInfo/{id}", method = RequestMethod.GET)
+    public CommonResult getProduct(@PathVariable("id")long id) {
+       PmsProduct product = productService.getProduct(id);
+        return CommonResult.success(product);
+    }
 }
 
 

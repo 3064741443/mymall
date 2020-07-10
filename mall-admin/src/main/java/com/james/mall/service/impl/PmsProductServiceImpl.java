@@ -102,6 +102,12 @@ public class PmsProductServiceImpl implements PmsProductService {
         return productMapper.updateByExampleSelective(product, productExample);
     }
 
+    @Override
+    public PmsProduct getProduct(long id) {
+
+        return null;
+    }
+
 
 }
 

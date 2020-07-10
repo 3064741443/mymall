@@ -84,6 +84,16 @@ public interface PmsProductService {
      * @return int
      */
     int updateNewStatus(List<Long> ids, Integer newStatus);
+
+    /**
+     * description:根据商品id获取商品编辑信息
+     * version: 1.0 
+     * date 2020/5/21 0:54
+     * author James
+     * @param id 
+     * @return com.james.mall.model.PmsProduct 
+     */
+    PmsProduct getProduct(long id);
 }
 
 
