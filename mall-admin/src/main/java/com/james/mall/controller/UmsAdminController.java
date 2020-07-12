@@ -8,6 +8,7 @@ import com.james.mall.service.UmsAdminService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,18 +16,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @program: mymall
  * @description：用户后台管理
  * @create: 2020-07-10 14:26
- * @author: luoqiang
+ * @author: James
  * @version: 1.0
  */
 @Controller
 @Api(tags = "UmsAdminController",description = "后台用户管理")
 @RequestMapping("/admin")
 public class UmsAdminController {
-
+    @Value("${jwt.tokenHeader}")
+    private String tokenHeader;
+    @Value("${jwt.tokenHead}")
+    private String tokenHead;
     @Autowired
     private UmsAdminService adminService;
 
@@ -44,12 +51,15 @@ public class UmsAdminController {
     @ApiOperation(value = "登录以后返回token")
     @RequestMapping(value = "/login",method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult<UmsAdmin> login(@RequestBody UmsAdminLoginParam umsAdminLoginParam, BindingResult result){
-        UmsAdmin umsAdmin= adminService.login(umsAdminLoginParam.getUsername(),umsAdminLoginParam.getPassword());
-        if(umsAdmin==null){
-            CommonResult.failed();
+    public CommonResult login(@RequestBody UmsAdminLoginParam umsAdminLoginParam, BindingResult result){
+        String token= adminService.login(umsAdminLoginParam.getUsername(),umsAdminLoginParam.getPassword());
+        if(token==null){
+            CommonResult.validateFailed("用户名或者密码错误");
         }
-        return CommonResult.success(umsAdmin);
+        Map<String,Object> tokenMap=new HashMap<>(2);
+        tokenMap.put("token",token);
+        tokenMap.put("tokenHead",tokenHead);
+        return CommonResult.success(tokenMap);
     }
 
 }

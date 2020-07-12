@@ -1,13 +1,23 @@
 package com.james.mall.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import com.james.mall.bo.AdminUserDetails;
+import com.james.mall.dao.UmsAdminRoleRelationDao;
 import com.james.mall.dto.UmsAdminParam;
 import com.james.mall.dto.UpdateAdminPasswordParam;
 import com.james.mall.mapper.UmsAdminMapper;
 import com.james.mall.model.*;
+import com.james.mall.security.util.JwtTokenUtil;
 import com.james.mall.service.UmsAdminService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,46 +28,79 @@ import java.util.List;
  * @program: mymall
  * @description：UmsAdminService实现类
  * @create: 2020-07-10 16:01
- * @author: luoqiang
+ * @author: james
  * @version: 1.0
  */
 @Service
 public class UmsAdminServiceImpl implements UmsAdminService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UmsAdminServiceImpl.class);
 
     @Autowired
-    private UmsAdminMapper adminMapper;
+    private  JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private UmsAdminMapper umsAdminMapper;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UmsAdminCacheService umsAdminCacheService;
+
+    @Autowired
+    private UmsAdminRoleRelationDao umsAdminRoleRelationDao;
+
     @Override
     public UmsAdmin getAdminByUserName(String userName) {
+        UmsAdmin umsAdmin = umsAdminCacheService.getAdmin(userName);
+        if (umsAdmin != null) {
+            return umsAdmin;
+        }
+        UmsAdminExample umsAdminExample = new UmsAdminExample();
+        umsAdminExample.createCriteria().andUsernameEqualTo(userName);
+        List<UmsAdmin> umsAdminList = umsAdminMapper.selectByExample(umsAdminExample);
+        if (umsAdminList != null && umsAdminList.size() > 0) {
+            umsAdmin = umsAdminList.get(0);
+            umsAdminCacheService.setAdmin(umsAdmin);
+            return umsAdmin;
+        }
         return null;
     }
 
     @Override
     public UmsAdmin register(UmsAdminParam umsAdminParam) {
-        UmsAdmin umsAdmin=new UmsAdmin();
-        BeanUtils.copyProperties(umsAdminParam,umsAdmin);
+        UmsAdmin umsAdmin = new UmsAdmin();
+        BeanUtils.copyProperties(umsAdminParam, umsAdmin);
         umsAdmin.setCreateTime(new Date());
         umsAdmin.setStatus(1);
 
-        UmsAdminExample umsAdminExample=new UmsAdminExample();
+        UmsAdminExample umsAdminExample = new UmsAdminExample();
         umsAdminExample.createCriteria().andUsernameEqualTo(umsAdmin.getUsername());
-        List<UmsAdmin> umsAdminList=adminMapper.selectByExample(umsAdminExample);
-        if(umsAdminList.size()>0){
+        List<UmsAdmin> umsAdminList = umsAdminMapper.selectByExample(umsAdminExample);
+        if (umsAdminList.size() > 0) {
             return null;
         }
-        String password=passwordEncoder.encode(umsAdmin.getPassword());
+        String password = passwordEncoder.encode(umsAdmin.getPassword());
         umsAdmin.setPassword(password);
-        adminMapper.insert(umsAdmin);
-        return  umsAdmin;
+        umsAdminMapper.insert(umsAdmin);
+        return umsAdmin;
     }
 
     @Override
-    public UmsAdmin login(String userName, String password) {
-        
-        return null;
+    public String login(String userName, String password) {
+        String token=null;
+        try {
+            UserDetails userDetails = loadUserByUsername(userName);
+            if(!passwordEncoder.matches(password,userDetails.getPassword())){
+                throw new BadCredentialsException("密码不正确");
+            }
+            UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            token= jwtTokenUtil.generateToken(userDetails);
+        } catch (BadCredentialsException e) {
+            LOGGER.warn("登录异常:{}"+e.getMessage());
+        }
+        return token;
     }
 
     @Override
@@ -97,7 +140,15 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public List<UmsResource> getResourceList(Long adminId) {
-        return null;
+        List<UmsResource> umsResourceList=umsAdminCacheService.getResourceList(adminId);
+        if(CollUtil.isNotEmpty(umsResourceList)){
+            return  umsResourceList;
+        }
+        umsResourceList=umsAdminRoleRelationDao.getResourceList(adminId);
+        if(CollUtil.isNotEmpty(umsResourceList)){
+            umsAdminCacheService.setResourceList(adminId,umsResourceList);
+        }
+        return umsResourceList;
     }
 
     @Override
@@ -116,7 +167,12 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     }
 
     @Override
-    public UserDetails getUserByUserName(String userName) {
-        return null;
+    public UserDetails loadUserByUsername(String userName) {
+        UmsAdmin umsAdmin = getAdminByUserName(userName);
+        if (umsAdmin != null) {
+            List<UmsResource> umsResourceList = getResourceList(umsAdmin.getId());
+            return new AdminUserDetails(umsAdmin, umsResourceList);
+        }
+        throw new UsernameNotFoundException("用户名或者密码错误");
     }
 }

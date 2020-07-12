@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * @program: mymall
  * @description：SpringSecurity需要的用户详情
  * @create: 2020-07-10 10:33
- * @author: james
+ * @author: James
  * @version: 1.0
  */
 public class AdminUserDetails implements UserDetails {
@@ -36,12 +36,12 @@ public class AdminUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return umsAdmin.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return umsAdmin.getUsername();
     }
 
     @Override

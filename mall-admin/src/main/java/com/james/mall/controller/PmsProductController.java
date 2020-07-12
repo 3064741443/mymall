@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @program: mymall
  * @description: 商品管理控制层
- * @author: james
+ * @author: James
  * @create: 2020-01-13 01:02
  */
 @Api(tags = "PmsProductController", description = "商品管理")
@@ -103,12 +103,12 @@ public class PmsProductController {
         }
     }
 
-    @ApiOperation("查询商品")
+  /*  @ApiOperation("查询商品")
     @RequestMapping(value = "/updateInfo/{id}", method = RequestMethod.GET)
     public CommonResult getProduct(@PathVariable("id")long id) {
        PmsProduct product = productService.getProduct(id);
         return CommonResult.success(product);
-    }
+    }*/
 }
 
 

@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * secret为加密算法的密钥
  * HMACSHA512(base64UrlEncode(header) + "." +base64UrlEncode(payload),secret)
- * Created by macro on 2018/4/26.
+ * Created by James on 2020/4/26.
  */
 public class JwtTokenUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtil.class);

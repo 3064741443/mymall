@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * @program: mymall
  * @description: 商品管理Service实现类
- * @author: james
+ * @author: James
  * @create: 2020-01-13 01:17
  */
 @Service
@@ -33,7 +33,7 @@ public class PmsProductServiceImpl implements PmsProductService {
 
     @Override
     public PmsProductResult getUpdateInfo(String id) {
-        PmsProductResult productResult=productDao.getUpdateInfo(id);
+        PmsProductResult productResult = productDao.getUpdateInfo(id);
         return productResult;
     }
 
@@ -63,7 +63,6 @@ public class PmsProductServiceImpl implements PmsProductService {
         }
         return productMapper.selectByExample(productExample);
     }
-
 
     @Override
     public List<PmsProduct> listProduct(String keyword) {
@@ -106,9 +105,9 @@ public class PmsProductServiceImpl implements PmsProductService {
 
     @Override
     public int updateNewStatus(List<Long> ids, Integer newStatus) {
-        PmsProduct product=new PmsProduct();
+        PmsProduct product = new PmsProduct();
         product.setNewStatus(newStatus);
-        PmsProductExample productExample=new PmsProductExample();
+        PmsProductExample productExample = new PmsProductExample();
         productExample.createCriteria().andIdIn(ids);
         return productMapper.updateByExampleSelective(product, productExample);
     }
@@ -119,7 +118,4 @@ public class PmsProductServiceImpl implements PmsProductService {
         return null;
     }
 
-
 }
-
-

@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 后台管理员Service
- * Created by macro on 2020/4/26.
+ * Created by James on 2020/4/26.
  */
 public interface UmsAdminService {
 
@@ -21,7 +21,7 @@ public interface UmsAdminService {
      * description: 根据用户名获取后台管理员
      * version: 1.0
      * date 2020/7/10 14:51
-     * author luoqiang
+     * author James
      * @param userName
      * @return com.james.mall.model.UmsAdmin
      */
@@ -31,7 +31,7 @@ public interface UmsAdminService {
      * description: 注册功能
      * version: 1.0
      * date 2020/7/10 14:49
-     * author luoqiang
+     * author James
      * @param umsAdminParam
      * @return com.james.mall.model.UmsAdmin
      */
@@ -41,18 +41,18 @@ public interface UmsAdminService {
      * description:登录功能
      * version: 1.0
      * date 2020/7/10 14:49
-     * author luoqiang
+     * author James
      * @param userName 用户名
      * @param password 密码
      * @return com.james.mall.model.UmsAdmin
      */
-    UmsAdmin login(String userName,String password);
+    String login(String userName,String password);
 
     /**
      * description: 刷新token的功能
      * version: 1.0
      * date 2020/7/10 14:54
-     * author luoqiang
+     * author James
      * @param ordToken 旧的token
      * @return java.lang.String
      */
@@ -62,7 +62,7 @@ public interface UmsAdminService {
      * description: 根据用户ID获取用户
      * version: 1.0
      * date 2020/7/10 14:57
-     * author luoqiang
+     * author James
      * @param id
      * @return com.james.mall.model.UmsAdmin
      */
@@ -72,7 +72,7 @@ public interface UmsAdminService {
      * description: 根据用户名或者昵称分页查询用户
      * version: 1.0 
      * date 2020/7/10 15:04
-     * author luoqiang
+     * author James
      * @param keyWord
      * @param pageNum
      * @param pageSize 
@@ -84,7 +84,7 @@ public interface UmsAdminService {
      * description: 修改指定用户信息
      * version: 1.0 
      * date 2020/7/10 15:18
-     * author luoqiang
+     * author James
      * @param id
      * @param umsAdmin 
      * @return int 
@@ -95,7 +95,7 @@ public interface UmsAdminService {
      * description: 删除指定用户
      * version: 1.0 
      * date 2020/7/10 15:18
-     * author luoqiang
+     * author James
      * @param id 
      * @return int 
      */
@@ -105,7 +105,7 @@ public interface UmsAdminService {
      * description: 修改用户角色关系
      * version: 1.0 
      * date 2020/7/10 15:19
-     * author luoqiang
+     * author James
      * @param adminId
      * @param roleIds 
      * @return int 
@@ -117,7 +117,7 @@ public interface UmsAdminService {
      * description: 获取用户角色列表
      * version: 1.0 
      * date 2020/7/10 15:20
-     * author luoqiang
+     * author James
      * @param adminId 
      * @return java.util.List<com.james.mall.model.UmsRole> 
      */
@@ -127,7 +127,7 @@ public interface UmsAdminService {
      * description: 获取指定用户的可访问资源
      * version: 1.0 
      * date 2020/7/10 15:21
-     * author luoqiang
+     * author James
      * @param adminId 
      * @return java.util.List<com.james.mall.model.UmsResource> 
      */
@@ -137,7 +137,7 @@ public interface UmsAdminService {
      * description:修改用户的+-权限
      * version: 1.0 
      * date 2020/7/10 15:22
-     * author luoqiang
+     * author James
      * @param adminId
      * @param permissionIds 
      * @return int 
@@ -149,7 +149,7 @@ public interface UmsAdminService {
      * description: 获取用户所有权限(包括角色权限和+-权限)
      * version: 1.0
      * date 2020/7/10 15:24
-     * author luoqiang
+     * author James
      * @param adminId
      * @return java.util.List<com.james.mall.model.UmsPermission>
      */
@@ -159,7 +159,7 @@ public interface UmsAdminService {
      * description: 修改用户密码
      * version: 1.0
      * date 2020/7/10 15:28
-     * author luoqiang
+     * author James
      * @param updateAdminPasswordParam
      * @return int
      */
@@ -169,11 +169,11 @@ public interface UmsAdminService {
      * description: 获取用户信息
      * version: 1.0
      * date 2020/7/10 15:29
-     * author luoqiang
+     * author James
      * @param userName
      * @return org.springframework.security.core.userdetails.UserDetails
      */
-    UserDetails getUserByUserName(String userName);
+    UserDetails loadUserByUsername(String userName);
 
 
 

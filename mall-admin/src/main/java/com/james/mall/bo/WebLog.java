@@ -2,7 +2,7 @@ package com.james.mall.bo;
 
 /**
  * Controller层的日志封装类
- * Created by james on 2020/4/26.
+ * Created by James on 2020/4/26.
  */
 public class WebLog {
     /**

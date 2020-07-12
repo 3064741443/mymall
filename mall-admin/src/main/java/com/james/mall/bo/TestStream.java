@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
  * @program: mall
  * @description：
  * @create: 2020-07-10 11:04
- * @author: luoqiang
+ * @author: James
  * @version: 1.0
  */
 public class TestStream {
