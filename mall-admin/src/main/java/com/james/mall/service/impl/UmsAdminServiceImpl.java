@@ -5,6 +5,7 @@ import com.james.mall.bo.AdminUserDetails;
 import com.james.mall.dao.UmsAdminRoleRelationDao;
 import com.james.mall.dto.UmsAdminParam;
 import com.james.mall.dto.UpdateAdminPasswordParam;
+import com.james.mall.mapper.UmsAdminLoginLogMapper;
 import com.james.mall.mapper.UmsAdminMapper;
 import com.james.mall.model.*;
 import com.james.mall.security.util.JwtTokenUtil;
@@ -20,7 +21,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -49,6 +53,9 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Autowired
     private UmsAdminRoleRelationDao umsAdminRoleRelationDao;
+
+    @Autowired
+    private UmsAdminLoginLogMapper umsAdminLoginLogMapper;
 
     @Override
     public UmsAdmin getAdminByUserName(String userName) {
@@ -80,6 +87,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         if (umsAdminList.size() > 0) {
             return null;
         }
+        //对密码进行加密操作
         String password = passwordEncoder.encode(umsAdmin.getPassword());
         umsAdmin.setPassword(password);
         umsAdminMapper.insert(umsAdmin);
@@ -97,10 +105,35 @@ public class UmsAdminServiceImpl implements UmsAdminService {
             UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             token= jwtTokenUtil.generateToken(userDetails);
+            updateLoginTimeByUsername(userName);
+            insertLoginLog(userName);
         } catch (BadCredentialsException e) {
             LOGGER.warn("登录异常:{}"+e.getMessage());
         }
         return token;
+    }
+
+    private void insertLoginLog(String username) {
+        UmsAdmin admin = getAdminByUserName(username);
+        if(admin==null) return;
+        UmsAdminLoginLog loginLog = new UmsAdminLoginLog();
+        loginLog.setAdminId(admin.getId());
+        loginLog.setCreateTime(new Date());
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        loginLog.setIp(request.getRemoteAddr());
+        umsAdminLoginLogMapper.insert(loginLog);
+    }
+
+    /**
+     * 根据用户名修改登录时间
+     */
+    private void updateLoginTimeByUsername(String username) {
+       UmsAdmin record=new UmsAdmin();
+       record.setLoginTime(new Date());
+       UmsAdminExample umsAdminExample=new UmsAdminExample();
+       umsAdminExample.createCriteria().andUsernameEqualTo(username);
+       umsAdminMapper.updateByExampleSelective(record,umsAdminExample);
     }
 
     @Override
