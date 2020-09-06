@@ -76,5 +76,18 @@ public class UmsAdminController {
         return CommonResult.success(tokenMap);
     }
 
-
+    @ApiOperation(value = "刷新token")
+    @ResponseBody
+    @GetMapping
+    public CommonResult refreshToken(HttpServletRequest request){
+        String token=request.getHeader(tokenHeader);
+        String refreshToken=adminService.refreshToken(token);
+        if(StringUtils.isEmpty(refreshToken)){
+            CommonResult.failed("token已经过期!");
+        }
+        Map<String, String> tokenMap=new HashMap<>();
+        tokenMap.put("refreshToken",refreshToken);
+        tokenMap.put("tokenHead",tokenHead);
+        return CommonResult.success(tokenMap);
+    }
 }
