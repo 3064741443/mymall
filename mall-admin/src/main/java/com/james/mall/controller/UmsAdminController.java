@@ -10,12 +10,11 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,5 +60,21 @@ public class UmsAdminController {
         tokenMap.put("tokenHead",tokenHead);
         return CommonResult.success(tokenMap);
     }
+
+    @ApiOperation(value = "刷新token")
+    @ResponseBody
+    @GetMapping
+    public CommonResult refreshToken(HttpServletRequest request){
+        String token=request.getHeader(tokenHeader);
+        String refreshToken=adminService.refreshToken(token);
+        if(StringUtils.isEmpty(refreshToken)){
+            CommonResult.failed("token已经过期!");
+        }
+        Map<String, String> tokenMap=new HashMap<>();
+        tokenMap.put("refreshToken",refreshToken);
+        tokenMap.put("tokenHead",tokenHead);
+        return CommonResult.success(tokenMap);
+    }
+
 
 }

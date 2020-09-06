@@ -138,7 +138,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public String refreshToken(String ordToken) {
-        return null;
+        return jwtTokenUtil.refreshHeadToken(ordToken);
     }
 
     @Override
