@@ -1,6 +1,7 @@
 package com.james.mall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.github.pagehelper.PageHelper;
 import com.james.mall.bo.AdminUserDetails;
 import com.james.mall.dao.UmsAdminRoleRelationDao;
 import com.james.mall.dto.UmsAdminParam;
@@ -21,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -40,7 +42,7 @@ public class UmsAdminServiceImpl implements UmsAdminService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmsAdminServiceImpl.class);
 
     @Autowired
-    private  JwtTokenUtil jwtTokenUtil;
+    private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
     private UmsAdminMapper umsAdminMapper;
@@ -96,26 +98,26 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public String login(String userName, String password) {
-        String token=null;
+        String token = null;
         try {
             UserDetails userDetails = loadUserByUsername(userName);
-            if(!passwordEncoder.matches(password,userDetails.getPassword())){
+            if (!passwordEncoder.matches(password, userDetails.getPassword())) {
                 throw new BadCredentialsException("密码不正确");
             }
-            UsernamePasswordAuthenticationToken authenticationToken=new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            token= jwtTokenUtil.generateToken(userDetails);
+            token = jwtTokenUtil.generateToken(userDetails);
             updateLoginTimeByUsername(userName);
             insertLoginLog(userName);
         } catch (BadCredentialsException e) {
-            LOGGER.warn("登录异常:{}"+e.getMessage());
+            LOGGER.warn("登录异常:{}" + e.getMessage());
         }
         return token;
     }
 
     private void insertLoginLog(String username) {
         UmsAdmin admin = getAdminByUserName(username);
-        if(admin==null) return;
+        if (admin == null) return;
         UmsAdminLoginLog loginLog = new UmsAdminLoginLog();
         loginLog.setAdminId(admin.getId());
         loginLog.setCreateTime(new Date());
@@ -129,11 +131,11 @@ public class UmsAdminServiceImpl implements UmsAdminService {
      * 根据用户名修改登录时间
      */
     private void updateLoginTimeByUsername(String username) {
-       UmsAdmin record=new UmsAdmin();
-       record.setLoginTime(new Date());
-       UmsAdminExample umsAdminExample=new UmsAdminExample();
-       umsAdminExample.createCriteria().andUsernameEqualTo(username);
-       umsAdminMapper.updateByExampleSelective(record,umsAdminExample);
+        UmsAdmin record = new UmsAdmin();
+        record.setLoginTime(new Date());
+        UmsAdminExample umsAdminExample = new UmsAdminExample();
+        umsAdminExample.createCriteria().andUsernameEqualTo(username);
+        umsAdminMapper.updateByExampleSelective(record, umsAdminExample);
     }
 
     @Override
@@ -143,17 +145,37 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public UmsAdmin getAdminById(Long id) {
-        return null;
+        return umsAdminMapper.selectByPrimaryKey(id);
     }
 
     @Override
     public List<UmsAdmin> listUmsAdmin(String keyWord, Integer pageNum, Integer pageSize) {
-        return null;
+        PageHelper.startPage(pageNum, pageSize);
+        UmsAdminExample example = new UmsAdminExample();
+        UmsAdminExample.Criteria criteria = example.createCriteria();
+        if (!StringUtils.isEmpty(keyWord)) {
+            criteria.andUsernameLike("%" + keyWord + "%");
+            example.or(example.createCriteria().andNickNameLike("%" + keyWord + "%"));
+        }
+        return umsAdminMapper.selectByExample(example);
     }
 
     @Override
     public int updateById(Long id, UmsAdmin umsAdmin) {
-        return 0;
+        umsAdmin.setId(id);
+        UmsAdmin rawAdmin = umsAdminMapper.selectByPrimaryKey(id);
+        if (rawAdmin.getPassword().equals(umsAdmin.getPassword())) {
+            umsAdmin.setPassword(null);
+        } else {
+            if (StringUtils.isEmpty(umsAdmin.getPassword())) {
+                umsAdmin.setPassword(null);
+            } else {
+                umsAdmin.setPassword(passwordEncoder.encode(umsAdmin.getPassword()));
+            }
+        }
+        int count=umsAdminMapper.updateByPrimaryKeySelective(umsAdmin);
+        umsAdminCacheService.delAdmin(id);
+        return count;
     }
 
     @Override
@@ -168,18 +190,18 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public List<UmsRole> getRoleList(Long adminId) {
-        return null;
+        return umsAdminRoleRelationDao.getRoleList(adminId);
     }
 
     @Override
     public List<UmsResource> getResourceList(Long adminId) {
-        List<UmsResource> umsResourceList=umsAdminCacheService.getResourceList(adminId);
-        if(CollUtil.isNotEmpty(umsResourceList)){
-            return  umsResourceList;
+        List<UmsResource> umsResourceList = umsAdminCacheService.getResourceList(adminId);
+        if (CollUtil.isNotEmpty(umsResourceList)) {
+            return umsResourceList;
         }
-        umsResourceList=umsAdminRoleRelationDao.getResourceList(adminId);
-        if(CollUtil.isNotEmpty(umsResourceList)){
-            umsAdminCacheService.setResourceList(adminId,umsResourceList);
+        umsResourceList = umsAdminRoleRelationDao.getResourceList(adminId);
+        if (CollUtil.isNotEmpty(umsResourceList)) {
+            umsAdminCacheService.setResourceList(adminId, umsResourceList);
         }
         return umsResourceList;
     }

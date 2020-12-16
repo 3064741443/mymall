@@ -19,4 +19,14 @@
 			and ur.id is NOT NULL
             GROUP BY ur.id
     </select>
+
+    <select id="getRoleList" resultMap="com.james.mall.mapper.UmsRoleMapper.BaseResultMap">
+		SELECT
+		    ur.*
+		FROM
+			ums_admin_role_relation uarr
+		LEFT JOIN ums_role ur ON uarr.role_id = ur.id
+		WHERE
+			uarr.admin_id = #{adminId}
+    </select>
 </mapper>

@@ -3,6 +3,7 @@ package com.james.mall.service.impl;
 import com.james.mall.model.UmsAdmin;
 import com.james.mall.model.UmsResource;
 import com.james.mall.security.service.RedisService;
+import com.james.mall.service.UmsAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,9 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
     @Autowired
     private RedisService redisService;
 
+    @Autowired
+    private UmsAdminService adminService;
+
     @Value("${redis.database}")
     private String REDIS_DATABASE;
     @Value("${redis.expire.common}")
@@ -33,7 +37,11 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Override
     public void delAdmin(Long adminId) {
-
+        UmsAdmin umsAdmin = adminService.getAdminById(adminId);
+        if(umsAdmin!=null){
+            String key=REDIS_DATABASE+":"+REDIS_KEY_ADMIN+":"+umsAdmin.getUsername();
+            redisService.del(key);
+        }
     }
 
     @Override
@@ -59,7 +67,7 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
     @Override
     public UmsAdmin getAdmin(String username) {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_ADMIN + ":" + username;
-        return (UmsAdmin)redisService.get(key);
+        return (UmsAdmin) redisService.get(key);
     }
 
     @Override
@@ -71,12 +79,12 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
     @Override
     public List<UmsResource> getResourceList(Long adminId) {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_RESOURCE_LIST + ":" + adminId;
-        return (List<UmsResource>)redisService.get(key);
+        return (List<UmsResource>) redisService.get(key);
     }
 
     @Override
     public void setResourceList(Long adminId, List<UmsResource> resourceList) {
         String key = REDIS_DATABASE + ":" + REDIS_KEY_RESOURCE_LIST + ":" + adminId;
-        redisService.set(key,resourceList,REDIS_EXPIRE);
+        redisService.set(key, resourceList, REDIS_EXPIRE);
     }
 }
