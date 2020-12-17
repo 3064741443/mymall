@@ -1,13 +1,17 @@
 package com.james.mall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.StrUtil;
 import com.github.pagehelper.PageHelper;
 import com.james.mall.bo.AdminUserDetails;
+import com.james.mall.common.exception.Asserts;
 import com.james.mall.dao.UmsAdminRoleRelationDao;
 import com.james.mall.dto.UmsAdminParam;
 import com.james.mall.dto.UpdateAdminPasswordParam;
 import com.james.mall.mapper.UmsAdminLoginLogMapper;
 import com.james.mall.mapper.UmsAdminMapper;
+import com.james.mall.mapper.UmsAdminRoleRelationMapper;
 import com.james.mall.model.*;
 import com.james.mall.security.util.JwtTokenUtil;
 import com.james.mall.service.UmsAdminService;
@@ -27,6 +31,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -55,6 +60,9 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Autowired
     private UmsAdminRoleRelationDao umsAdminRoleRelationDao;
+
+    @Autowired
+    private UmsAdminRoleRelationMapper umsAdminRoleRelationMapper;
 
     @Autowired
     private UmsAdminLoginLogMapper umsAdminLoginLogMapper;
@@ -102,8 +110,11 @@ public class UmsAdminServiceImpl implements UmsAdminService {
         try {
             UserDetails userDetails = loadUserByUsername(userName);
             if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-                throw new BadCredentialsException("密码不正确");
+                Asserts.fail("密码不正确");
             }
+            /*if (!userDetails.isEnabled()) {
+                Asserts.fail("帐号已被禁用");
+            }*/
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             token = jwtTokenUtil.generateToken(userDetails);
@@ -173,19 +184,37 @@ public class UmsAdminServiceImpl implements UmsAdminService {
                 umsAdmin.setPassword(passwordEncoder.encode(umsAdmin.getPassword()));
             }
         }
-        int count=umsAdminMapper.updateByPrimaryKeySelective(umsAdmin);
+        int count = umsAdminMapper.updateByPrimaryKeySelective(umsAdmin);
         umsAdminCacheService.delAdmin(id);
         return count;
     }
 
     @Override
     public int deleteById(Long id) {
-        return 0;
+        return umsAdminMapper.deleteByPrimaryKey(id);
     }
 
     @Override
     public int updateRole(Long adminId, List<Long> roleIds) {
-        return 0;
+        int count = roleIds == null ? 0 : roleIds.size();
+        //删除原来用户和角色的关系
+        UmsAdminRoleRelationExample example = new UmsAdminRoleRelationExample();
+        example.createCriteria().andAdminIdEqualTo(adminId);
+        umsAdminRoleRelationMapper.deleteByExample(example);
+        //建立新的用户和角色关系
+        UmsAdminRoleRelation umsAdminRoleRelation=null;
+        List<UmsAdminRoleRelation> adminRoleRelations=new ArrayList<>();
+        if(!CollectionUtil.isEmpty(roleIds)) {
+            for (Long roleId : roleIds) {
+                umsAdminRoleRelation = new UmsAdminRoleRelation();
+                umsAdminRoleRelation.setAdminId(adminId);
+                umsAdminRoleRelation.setRoleId(roleId);
+                adminRoleRelations.add(umsAdminRoleRelation);
+            }
+            umsAdminRoleRelationDao.insertList(adminRoleRelations);
+        }
+        umsAdminCacheService.delResourceList(adminId);
+        return count;
     }
 
     @Override
@@ -218,7 +247,25 @@ public class UmsAdminServiceImpl implements UmsAdminService {
 
     @Override
     public int updatePassword(UpdateAdminPasswordParam updateAdminPasswordParam) {
-        return 0;
+        if (StrUtil.isEmpty(updateAdminPasswordParam.getUsername())
+                || StrUtil.isEmpty(updateAdminPasswordParam.getOldPassword())
+                || StrUtil.isEmpty(updateAdminPasswordParam.getNewPassword())) {
+            return -1;
+        }
+        UmsAdminExample example = new UmsAdminExample();
+        example.createCriteria().andUsernameEqualTo(updateAdminPasswordParam.getUsername());
+        List<UmsAdmin> umsAdminList = umsAdminMapper.selectByExample(example);
+        if (CollUtil.isEmpty(umsAdminList)) {
+            return -2;
+        }
+        UmsAdmin umsAdmin = umsAdminList.get(0);
+        if (!passwordEncoder.matches(updateAdminPasswordParam.getOldPassword(), umsAdmin.getPassword())) {
+            return -3;
+        }
+        umsAdmin.setPassword(passwordEncoder.encode(updateAdminPasswordParam.getNewPassword()));
+        umsAdminMapper.updateByPrimaryKey(umsAdmin);
+        umsAdminCacheService.delAdmin(umsAdmin.getId());
+        return 1;
     }
 
     @Override

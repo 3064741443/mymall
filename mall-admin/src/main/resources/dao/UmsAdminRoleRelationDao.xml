@@ -29,4 +29,13 @@
 		WHERE
 			uarr.admin_id = #{adminId}
     </select>
+
+    <insert id="insertList">
+        insert into ums_admin_role_relation (admin_id, role_id) values
+        <foreach collection="list" separator="," item="item" index="index">
+            (#{item.adminId,jdbcType=BIGINT},
+            #{item.roleId,jdbcType=BIGINT})
+        </foreach>
+    </insert>
+
 </mapper>

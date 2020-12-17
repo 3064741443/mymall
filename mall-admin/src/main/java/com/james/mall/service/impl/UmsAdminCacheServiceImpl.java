@@ -1,8 +1,8 @@
 package com.james.mall.service.impl;
 
+import com.james.mall.common.service.RedisService;
 import com.james.mall.model.UmsAdmin;
 import com.james.mall.model.UmsResource;
-import com.james.mall.security.service.RedisService;
 import com.james.mall.service.UmsAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +46,8 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Override
     public void delResourceList(Long adminId) {
+        String key=REDIS_DATABASE+":"+REDIS_KEY_RESOURCE_LIST+":"+adminId;
+        redisService.del(key);
 
     }
 

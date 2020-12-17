@@ -1,6 +1,6 @@
-package com.james.mall.security.service.impl;
+package com.james.mall.common.service.impl;
 
-import com.james.mall.security.service.RedisService;
+import com.james.mall.common.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -97,7 +97,7 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
-    public void hSetAll(String key, Map<String, Object> map) {
+    public void hSetAll(String key, Map<String, ?> map) {
         redisTemplate.opsForHash().putAll(key, map);
     }
 

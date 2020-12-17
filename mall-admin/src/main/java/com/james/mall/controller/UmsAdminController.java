@@ -5,6 +5,7 @@ import com.james.mall.common.api.CommonPage;
 import com.james.mall.common.api.CommonResult;
 import com.james.mall.dto.UmsAdminLoginParam;
 import com.james.mall.dto.UmsAdminParam;
+import com.james.mall.dto.UpdateAdminPasswordParam;
 import com.james.mall.model.UmsAdmin;
 import com.james.mall.model.UmsRole;
 import com.james.mall.service.UmsAdminService;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
  * @version: 1.0
  */
 @Controller
-@Api(tags = "UmsAdminController",description = "后台用户管理")
+@Api(tags = "UmsAdminController", description = "后台用户管理")
 @RequestMapping("/admin")
 public class UmsAdminController {
     @Value("${jwt.tokenHeader}")
@@ -46,42 +48,42 @@ public class UmsAdminController {
     private UmsRoleService roleService;
 
     @ApiOperation(value = "用户注册")
-    @RequestMapping(value = "/register",method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult<UmsAdmin> register(@RequestBody UmsAdminParam umsAdminParam, BindingResult result){
-        UmsAdmin umsAdmin= adminService.register(umsAdminParam);
-        if(umsAdmin==null){
+    public CommonResult<UmsAdmin> register(@RequestBody UmsAdminParam umsAdminParam, BindingResult result) {
+        UmsAdmin umsAdmin = adminService.register(umsAdminParam);
+        if (umsAdmin == null) {
             CommonResult.failed();
         }
         return CommonResult.success(umsAdmin);
     }
 
     @ApiOperation(value = "登录以后返回token")
-    @RequestMapping(value = "/login",method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult login(@RequestBody UmsAdminLoginParam umsAdminLoginParam, BindingResult result){
-        String token= adminService.login(umsAdminLoginParam.getUsername(),umsAdminLoginParam.getPassword());
-        if(token==null){
-            CommonResult.validateFailed("用户名或者密码错误");
+    public CommonResult login(@RequestBody UmsAdminLoginParam umsAdminLoginParam, BindingResult result) {
+        String token = adminService.login(umsAdminLoginParam.getUsername(), umsAdminLoginParam.getPassword());
+        if (token == null) {
+            return CommonResult.validateFailed("用户名或者密码错误");
         }
-        Map<String,Object> tokenMap=new HashMap<>(2);
-        tokenMap.put("token",token);
-        tokenMap.put("tokenHead",tokenHead);
+        Map<String, Object> tokenMap = new HashMap<>(2);
+        tokenMap.put("token", token);
+        tokenMap.put("tokenHead", tokenHead);
         return CommonResult.success(tokenMap);
     }
 
     @ApiOperation(value = "刷新token")
     @ResponseBody
     @GetMapping
-    public CommonResult refreshToken(HttpServletRequest request){
-        String token=request.getHeader(tokenHeader);
-        String refreshToken=adminService.refreshToken(token);
-        if(StringUtils.isEmpty(refreshToken)){
+    public CommonResult refreshToken(HttpServletRequest request) {
+        String token = request.getHeader(tokenHeader);
+        String refreshToken = adminService.refreshToken(token);
+        if (StringUtils.isEmpty(refreshToken)) {
             CommonResult.failed("token已经过期!");
         }
-        Map<String, String> tokenMap=new HashMap<>();
-        tokenMap.put("refreshToken",refreshToken);
-        tokenMap.put("tokenHead",tokenHead);
+        Map<String, String> tokenMap = new HashMap<>();
+        tokenMap.put("refreshToken", refreshToken);
+        tokenMap.put("tokenHead", tokenHead);
         return CommonResult.success(tokenMap);
     }
 
@@ -89,7 +91,7 @@ public class UmsAdminController {
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult getAdminInfo(Principal principal) {
-        if(principal==null){
+        if (principal == null) {
             return CommonResult.unauthorized(null);
         }
         String username = principal.getName();
@@ -99,9 +101,9 @@ public class UmsAdminController {
         data.put("menus", roleService.getMenuList(umsAdmin.getId()));
         data.put("icon", umsAdmin.getIcon());
         List<UmsRole> roleList = adminService.getRoleList(umsAdmin.getId());
-        if(CollUtil.isNotEmpty(roleList)){
+        if (CollUtil.isNotEmpty(roleList)) {
             List<String> roles = roleList.stream().map(UmsRole::getName).collect(Collectors.toList());
-            data.put("roles",roles);
+            data.put("roles", roles);
             //转为map,有重复键保留第一个
             //Map<Long,UmsRole> umsRoleMap=roleList.stream().collect(Collectors.toMap(UmsRole::getId,a->a,(k1,k2)->k1));
             //分组
@@ -126,6 +128,7 @@ public class UmsAdminController {
         List<UmsAdmin> adminList = adminService.listUmsAdmin(keyword, pageNum, pageSize);
         return CommonResult.success(CommonPage.restPage(adminList));
     }
+
     @ApiOperation("获取指定用户信息")
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
@@ -145,7 +148,7 @@ public class UmsAdminController {
         return CommonResult.failed();
     }
 
-/*
+
     @ApiOperation("修改指定用户密码")
     @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
     @ResponseBody
@@ -168,7 +171,7 @@ public class UmsAdminController {
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
     @ResponseBody
     public CommonResult delete(@PathVariable Long id) {
-        int count = adminService.delete(id);
+        int count = adminService.deleteById(id);
         if (count > 0) {
             return CommonResult.success(count);
         }
@@ -178,15 +181,16 @@ public class UmsAdminController {
     @ApiOperation("修改帐号状态")
     @RequestMapping(value = "/updateStatus/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public CommonResult updateStatus(@PathVariable Long id,@RequestParam(value = "status") Integer status) {
+    public CommonResult updateStatus(@PathVariable Long id, @RequestParam(value = "status") Integer status) {
         UmsAdmin umsAdmin = new UmsAdmin();
         umsAdmin.setStatus(status);
-        int count = adminService.update(id,umsAdmin);
+        int count = adminService.updateById(id, umsAdmin);
         if (count > 0) {
             return CommonResult.success(count);
         }
         return CommonResult.failed();
     }
+
 
     @ApiOperation("给用户分配角色")
     @RequestMapping(value = "/role/update", method = RequestMethod.POST)
@@ -200,13 +204,12 @@ public class UmsAdminController {
         return CommonResult.failed();
     }
 
+
     @ApiOperation("获取指定用户的角色")
     @RequestMapping(value = "/role/{adminId}", method = RequestMethod.GET)
     @ResponseBody
     public CommonResult<List<UmsRole>> getRoleList(@PathVariable Long adminId) {
         List<UmsRole> roleList = adminService.getRoleList(adminId);
         return CommonResult.success(roleList);
-    }*/
-
-
+    }
 }
