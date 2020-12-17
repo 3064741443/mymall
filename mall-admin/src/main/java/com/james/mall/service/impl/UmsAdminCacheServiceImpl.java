@@ -1,7 +1,11 @@
 package com.james.mall.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.james.mall.common.service.RedisService;
+import com.james.mall.mapper.UmsAdminRoleRelationMapper;
 import com.james.mall.model.UmsAdmin;
+import com.james.mall.model.UmsAdminRoleRelation;
+import com.james.mall.model.UmsAdminRoleRelationExample;
 import com.james.mall.model.UmsResource;
 import com.james.mall.service.UmsAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,9 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Autowired
     private UmsAdminService adminService;
+
+    @Autowired
+    private UmsAdminRoleRelationMapper adminRoleRelationMapper;
 
     @Value("${redis.database}")
     private String REDIS_DATABASE;
@@ -58,7 +65,12 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Override
     public void delResourceListByRoleIds(List<Long> roleIds) {
-
+        UmsAdminRoleRelationExample example=new UmsAdminRoleRelationExample();
+        example.createCriteria().andRoleIdIn(roleIds);
+        List<UmsAdminRoleRelation> adminRoleRelations= adminRoleRelationMapper.selectByExample(example);
+        if(CollUtil.isNotEmpty(adminRoleRelations)){
+            String key
+        }
     }
 
     @Override

@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 
 /**
  * 请求工具类
- * Created by macro on 2020/10/8.
+ * Created by james on 2020/10/8.
  */
 public class RequestUtil {
 

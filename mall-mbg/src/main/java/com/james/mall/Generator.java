@@ -11,7 +11,7 @@ import org.mybatis.generator.internal.DefaultShellCallback;
 
 /**
  * 用于生产MBG的代码
- * Created by macro on 2018/4/26.
+ * Created by james on 2018/4/26.
  */
 public class Generator {
     public static void main(String[] args) throws Exception {

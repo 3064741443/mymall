@@ -8,7 +8,7 @@
 //
 ///**
 // * OSS对象存储相关配置
-// * Created by macro on 2018/5/17.
+// * Created by james on 2018/5/17.
 // */
 //@Configuration
 //public class OssConfig {

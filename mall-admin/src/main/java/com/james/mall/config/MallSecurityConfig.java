@@ -19,7 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  * mall-security模块相关配置
- * Created by macro on 2019/11/9.
+ * Created by james on 2019/11/9.
  */
 @Configuration
 //

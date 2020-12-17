@@ -1,13 +1,16 @@
 package com.james.mall.service.impl;
 
 import com.james.mall.dao.UmsRoleDao;
+import com.james.mall.mapper.UmsRoleMapper;
 import com.james.mall.model.UmsMenu;
 import com.james.mall.model.UmsResource;
 import com.james.mall.model.UmsRole;
+import com.james.mall.model.UmsRoleExample;
 import com.james.mall.service.UmsRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,22 +22,35 @@ import java.util.List;
  */
 @Service
 public class UmsRoleServiceImpl implements UmsRoleService {
+    @Autowired
+    private UmsRoleMapper umsRoleMapper;
 
     @Autowired
     private UmsRoleDao roleDao;
 
+    @Autowired
+    private UmsAdminCacheService umsAdminCacheService;
+
     @Override
     public int create(UmsRole role) {
-        return 0;
+        role.setCreateTime(new Date());
+        role.setAdminCount(0);
+        role.setSort(0);
+        return umsRoleMapper.insert(role);
     }
 
     @Override
     public int update(Long id, UmsRole role) {
-        return 0;
+        role.setId(id);
+        return umsRoleMapper.updateByPrimaryKeySelective(role);
     }
 
     @Override
     public int delete(List<Long> ids) {
+        UmsRoleExample umsRoleExample=new UmsRoleExample();
+        umsRoleExample.createCriteria().andIdIn(ids);
+        umsRoleMapper.deleteByExample(umsRoleExample);
+        umsAdminCacheService.delResourceListByRoleIds(ids);
         return 0;
     }
 
