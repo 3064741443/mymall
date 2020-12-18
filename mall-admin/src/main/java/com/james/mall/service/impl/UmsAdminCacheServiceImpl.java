@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @program: mymall
@@ -60,7 +61,14 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
 
     @Override
     public void delResourceListByRole(Long roleId) {
-
+        UmsAdminRoleRelationExample example=new UmsAdminRoleRelationExample();
+        example.createCriteria().andRoleIdEqualTo(roleId);
+        List<UmsAdminRoleRelation> adminRoleRelations= adminRoleRelationMapper.selectByExample(example);
+        if(CollUtil.isNotEmpty(adminRoleRelations)){
+            String keyPrefix=REDIS_DATABASE+":"+REDIS_KEY_RESOURCE_LIST+":";
+            List<String> keys=adminRoleRelations.stream().map(ralation -> keyPrefix+ralation.getAdminId()).collect(Collectors.toList());
+            redisService.del(keys);
+        }
     }
 
     @Override
@@ -69,7 +77,9 @@ public class UmsAdminCacheServiceImpl implements UmsAdminCacheService {
         example.createCriteria().andRoleIdIn(roleIds);
         List<UmsAdminRoleRelation> adminRoleRelations= adminRoleRelationMapper.selectByExample(example);
         if(CollUtil.isNotEmpty(adminRoleRelations)){
-            String key
+            String keyPrefix=REDIS_DATABASE+":"+REDIS_KEY_RESOURCE_LIST+":";
+            List<String> keys=adminRoleRelations.stream().map(ralation -> keyPrefix+ralation.getAdminId()).collect(Collectors.toList());
+            redisService.del(keys);
         }
     }
 

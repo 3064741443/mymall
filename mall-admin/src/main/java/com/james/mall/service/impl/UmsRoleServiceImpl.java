@@ -1,14 +1,15 @@
 package com.james.mall.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.james.mall.dao.UmsRoleDao;
 import com.james.mall.mapper.UmsRoleMapper;
-import com.james.mall.model.UmsMenu;
-import com.james.mall.model.UmsResource;
-import com.james.mall.model.UmsRole;
-import com.james.mall.model.UmsRoleExample;
+import com.james.mall.mapper.UmsRoleMenuRelationMapper;
+import com.james.mall.mapper.UmsRoleResourceRelationMapper;
+import com.james.mall.model.*;
 import com.james.mall.service.UmsRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -24,6 +25,12 @@ import java.util.List;
 public class UmsRoleServiceImpl implements UmsRoleService {
     @Autowired
     private UmsRoleMapper umsRoleMapper;
+
+    @Autowired
+    private UmsRoleMenuRelationMapper roleMenuRelationMapper;
+
+    @Autowired
+    private UmsRoleResourceRelationMapper roleResourceRelationMapper;
 
     @Autowired
     private UmsRoleDao roleDao;
@@ -56,12 +63,17 @@ public class UmsRoleServiceImpl implements UmsRoleService {
 
     @Override
     public List<UmsRole> list() {
-        return null;
+        return umsRoleMapper.selectByExample(new UmsRoleExample());
     }
 
     @Override
     public List<UmsRole> list(String keyword, Integer pageSize, Integer pageNum) {
-        return null;
+        PageHelper.startPage(pageNum,pageSize);
+        UmsRoleExample example=new UmsRoleExample();
+        if(!StringUtils.isEmpty(keyword)){
+            example.createCriteria().andNameLike("%"+keyword+"%");
+        }
+        return umsRoleMapper.selectByExample(example);
     }
 
     @Override
@@ -72,21 +84,48 @@ public class UmsRoleServiceImpl implements UmsRoleService {
 
     @Override
     public List<UmsMenu> listMenu(Long roleId) {
-        return null;
+        List<UmsMenu> umsMenuList=roleDao.getMenuListByRoleId(roleId);
+        return umsMenuList;
     }
 
     @Override
     public List<UmsResource> listResource(Long roleId) {
-        return null;
+        List<UmsResource> umsResourceList=roleDao.getResourceListByRoleId(roleId);
+        return umsResourceList;
     }
 
     @Override
     public int allocMenu(Long roleId, List<Long> menuIds) {
-        return 0;
+        UmsRoleMenuRelationExample example=new UmsRoleMenuRelationExample();
+        example.createCriteria().andRoleIdEqualTo(roleId);
+        roleMenuRelationMapper.deleteByExample(example);
+        UmsRoleMenuRelation roleMenuRelation=null;
+        if(!StringUtils.isEmpty(menuIds)) {
+            for (Long menuId : menuIds) {
+                roleMenuRelation = new UmsRoleMenuRelation();
+                roleMenuRelation.setRoleId(roleId);
+                roleMenuRelation.setMenuId(menuId);
+                roleMenuRelationMapper.insert(roleMenuRelation);
+            }
+        }
+        return menuIds.size();
     }
 
     @Override
     public int allocResource(Long roleId, List<Long> resourceIds) {
-        return 0;
+        UmsRoleResourceRelationExample example=new UmsRoleResourceRelationExample();
+        example.createCriteria().andRoleIdEqualTo(roleId);
+        roleResourceRelationMapper.deleteByExample(example);
+        UmsRoleResourceRelation roleResourceRelation=null;
+        if(!StringUtils.isEmpty(resourceIds)){
+            for(Long resourceId:resourceIds){
+               roleResourceRelation=new UmsRoleResourceRelation();
+                roleResourceRelation.setRoleId(roleId);
+                roleResourceRelation.setResourceId(resourceId);
+                roleResourceRelationMapper.insert(roleResourceRelation);
+            }
+        }
+        umsAdminCacheService.delResourceListByRole(roleId);
+        return resourceIds.size();
     }
 }

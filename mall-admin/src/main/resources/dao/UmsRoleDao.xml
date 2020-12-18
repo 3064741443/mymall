@@ -23,4 +23,30 @@
 		GROUP BY
 			um.id
     </select>
+
+	<select id="getMenuListByRoleId" resultMap="com.james.mall.mapper.UmsMenuMapper.BaseResultMap">
+		SELECT
+			um.*
+		from
+		   ums_role_menu_relation urmr
+		LEFT JOIN ums_menu um ON urmr.menu_id = um.id
+		WHERE
+			urmr.role_id = #{roleId}
+		AND um.id IS NOT NULL
+		GROUP BY
+			um.id
+    </select>
+
+	<select id="getResourceListByRoleId" resultMap="com.james.mall.mapper.UmsResourceMapper.BaseResultMap">
+		SELECT
+			ur.*
+		from
+		   ums_role_resource_relation urrr
+		LEFT JOIN ums_resource ur ON urrr.resource_id = ur.id
+		WHERE
+			urrr.role_id = #{roleId}
+		AND ur.id IS NOT NULL
+		GROUP BY
+			ur.id
+    </select>
 </mapper>
